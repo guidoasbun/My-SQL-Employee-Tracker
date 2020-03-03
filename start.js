@@ -46,10 +46,13 @@ function createEmployee() {
     if (err) throw err
     manager.forEach(elem => { managerChoises.push(`${elem.first_name} ${elem.last_name}`)})
 })
-
+  // let roleChoisesId = []
   let roleChoises = []
   db.query(`SELECT roles.id, roles.title FROM roles`, (err, roles) => {
-    roles.forEach(elem => { roleChoises.push({id: elem.id, title: elem.title}) })
+    roles.forEach(elem => { roleChoises.push(elem.title)})
+    // roles.forEach(elem => { roleChoisesId.push(elem.id, elem.title)})
+    // console.log(roleChoises)
+    // console.log(roleChoisesId)
   })
   
   inquirer.prompt([
@@ -74,14 +77,31 @@ function createEmployee() {
       choices: managerChoises
     }
   ])
-  // .then(function({firstName, lastName, roles, manager}){
-  //   db.query(`INSERT INTO employee SET ?`, {
-  //     first_name: firstName,
-  //     last_name: last_name,
-  //     role_id: ,
-  //     manager_id: ,
-  //   })
-  // })
+  .then(function({firstName, lastName, roles, manager}){
+    let roleid
+    for (i = 0; i < roleChoises.length; i++){
+      if (roleChoises[i] === roles){
+        roleid = i+1
+      }
+    }
+    
+    let manager_id
+    for (i = 0; i < managerChoises.length; i++){
+      if (managerChoises[i] === manager){
+        managerid = i+1
+      }
+    }
+    db.query(`INSERT INTO employee SET ?`, {
+      first_name: firstName,
+      last_name: lastName,
+      role_id: roleid,
+      manager_id: managerid,
+    }, (err) => {
+        if (err) throw err
+        console.log('Employee created')
+        menu()
+     })
+  })
     
 }
 
