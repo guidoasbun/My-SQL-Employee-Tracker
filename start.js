@@ -12,7 +12,7 @@ function menu() {
     choices: [
       'Create employee',
       'Read all employees',
-      'Update employee',
+      'Update employee Role',
       'Delete employee',
       'Exit'
     ]
@@ -25,8 +25,8 @@ function menu() {
         case 'Read all employees':
           readAllEmployees()
           break
-        case 'Update employee':
-          updateEmployee()
+        case 'Update employee Role':
+          updateEmployeeRole()
           break
         case 'Delete employee':
           deleteEmployee()
@@ -45,14 +45,11 @@ function createEmployee() {
   WHERE NOT employee.manager_id = 'NULL'`, (err, manager) => {
     if (err) throw err
     manager.forEach(elem => { managerChoises.push(`${elem.first_name} ${elem.last_name}`)})
-})
-  // let roleChoisesId = []
+  })
   let roleChoises = []
   db.query(`SELECT roles.id, roles.title FROM roles`, (err, roles) => {
+    if (err) throw err
     roles.forEach(elem => { roleChoises.push(elem.title)})
-    // roles.forEach(elem => { roleChoisesId.push(elem.id, elem.title)})
-    // console.log(roleChoises)
-    // console.log(roleChoisesId)
   })
   
   inquirer.prompt([
@@ -121,11 +118,73 @@ ON m.id = e.manager_id`
     })
 }
 
-function updateEmployee() {
+function updateEmployeeRole() {
+
+  console.log('This is the function to update employee role')
+  menu()
   
+  // db.query('SELECT * FROM employee', (err, items) => {
+  //   if (err) throw err
+  //   let itemArrayOne = []
+  //   items.forEach(element => {
+  //     itemArrayOne.push(`${element.first_name} ${element.last_name}`)
+  //   })
+  // })
+
+  // inquirer.prompt([
+  //   {
+  //     type: 'list',
+  //     name: 'name',
+  //     choises: itemArrayOne,
+  //     message: 'Who is the employee to update?'
+  //   }
+  // ])
+  
+
+
+
 }
 
 function deleteEmployee() {
+  
+  let empChoices = []
+  db.query(`SELECT employee.id, employee.first_name, employee.last_name FROM employee`, (err, emp) => {
+    if (err) throw err
+    emp.forEach(elem => { empChoices.push(`${elem.first_name} ${elem.last_name}`) })
+    // empChoices = emp.map(({id, first_name, last_name})=>({
+    //   value: id, name: `${id} ${first_name} ${last_name}`
+    // }))
+    // console.table(emp)
+
+  
+  })
+  
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'empId',
+      message: 'Press Emter'
+    },
+    {
+      type: 'list',
+      name: 'empToDel',
+      message: 'Choose which employee will be deleted',
+      choices: empChoices
+    }
+  ])
+  .then(function ({empToDel}){
+    let empId
+    for (i = 0; i < empChoices.length; i++) {
+      if (empChoices[i] === empToDel) {
+        empId = i + 1
+      }
+    }
+    db.query(`DELETE FROM employee WHERE ?`, { id: empId}, err => {
+      if (err) throw err
+      console.log('Employee deleted')
+      menu()
+    })
+  })
 
 }
 
